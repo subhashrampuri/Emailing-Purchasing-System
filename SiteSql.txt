@@ -1,0 +1,52 @@
+Function GetPurchaseRequisitionNo(RequisitionId)
+	if RequisitionId <> "" then
+		sql = "Select RequisitionDate from tbl_Psystem_PurchaseRequestMaster where RequisitionNum = "& RequisitionId &" order by RequisitionDate desc"
+		Call Runsql(sql,rsPRDate)
+		if rsPRDate("RequisitionDate") <> "" then
+			PRDate = rsPRDate("RequisitionDate")
+		else
+			PRDate = ""
+		end if
+		GetPurchaseRequisitionNo="VSPL/PR/" & GetFinancialYear(PRDate) & "/" & RequisitionId
+	end if
+End Function
+
+Function GetPurchaseOrderNo(PurOrdNo)
+	if PurOrdNo <> "" then
+		'sql = "Select PurOrderDate from tbl_Psystem_PurchaseOrder where PurOrderNum = "& PurOrdNo &" "
+		sql = "Select Top 1  PurOrderDate from tbl_Psystem_PurchaseOrder where PurOrderNum = "& PurOrdNo &" order by PurOrderDate desc "
+		call runSql(sql,rsPODate)
+		if rsPODate("PurOrderDate") <> ""  then
+			PurOrdDate = rsPODate("PurOrderDate")
+		else
+			PurOrdDate = ""
+		end if
+		GetPurchaseOrderNo="VSPL/PO/" & GetFinancialYear(PurOrdDate) & "/" & PurOrdNo
+	end if
+End Function
+
+Function GetGRNNo(GRNNo)
+	if GRNNo <> "" then
+		sql = "Select Top 1 DeliveryDate from tbl_Psystem_GRN where GRNNum = "& GRNNo &" order by DeliveryDate desc "
+		Call Runsql(sql,rsGRN)
+		if rsGRN("DeliveryDate") <> "" then
+			GRNDate = rsGRN("DeliveryDate")
+		else
+			GRNDate = ""
+		end if
+		GetGRNNo="VSPL/GRN/" & GetFinancialYear(GRNDate) & "/" & GRNNo
+	end if
+End Function
+
+Function GetFinancialYear(strDate)
+	varMonth=datepart("m",strDate)
+	varYear=datepart("yyyy",strDate)
+
+	if varMonth<=3 then
+		returnValue=right(varYear-1,2)+"-"+right(varYear,2)
+	else
+		returnValue=right(varYear,2)+"-"+right(varYear+1,2)
+	end if
+
+	GetFinancialYear=returnValue
+End Function

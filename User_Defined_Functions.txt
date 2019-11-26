@@ -1,0 +1,44 @@
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+CREATE function dbo.fn_PSystem_GetFinanceManager()
+returns varchar(10)
+as
+begin
+	declare @FinanceManager as varchar(10)
+	select @FinanceManager=FinanceManager from tbl_PSystem_FinanceManager
+	
+	if @FinanceManager=null
+		set @FinanceManager=''
+
+		return @FinanceManager
+end			
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+
+SET QUOTED_IDENTIFIER ON 
+GO
+SET ANSI_NULLS ON 
+GO
+
+create function fn_PSystem_EmployeeDepartmentName(@EmployeeId as varchar(10))
+returns varchar(50)
+as
+begin
+	declare @retValue as varchar(50)
+	select @retValue=B.DeptName from VSPL_EmployeeHREntry A,sql_DepartmentMaster B where A.DeptId=B.DeptId and EmployeeId=@EmployeeId
+	return @retValue
+end
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+

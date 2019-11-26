@@ -1,0 +1,104 @@
+
+CREATE TABLE [tbl_PSystem_Control] (
+	[RecId] [int] IDENTITY (1, 1) NOT NULL ,
+	[ForType] [varchar] (3) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[ForYear] [varchar] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[EndDate] [datetime] NOT NULL ,
+	[Counter] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_Control_Counter] DEFAULT (0)
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_GRN] (
+	[GRNId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[GRNNo] [bigint] NOT NULL ,
+	[PurOrderNo] [bigint] NOT NULL ,
+	[RequisitionId] [bigint] NOT NULL ,
+	[PartyChallanNo] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[PartyChallanDate] [smalldatetime] NOT NULL ,
+	[SecurityEntryNo] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[DeliveryDate] [smalldatetime] NOT NULL ,
+	[LLRRNo] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[VehicleNo] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[SupplierName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[ItemDescription] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[QtyReceived] [int] NULL ,
+	[QtyAccepted] [int] NULL ,
+	[QtyRejected] [int] NULL ,
+	[Remarks] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[RemarksOnAccOrRej] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[isAccepted] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_GRN_isAccepted] DEFAULT (0),
+	[isGRNClosed] [bit] NOT NULL CONSTRAINT [DF_tbl_PSystem_GRN_isClosed] DEFAULT (0),
+	[GRNNum] [bigint] NULL ,
+	CONSTRAINT [PK_tbl_PSystem_GRN] PRIMARY KEY  CLUSTERED 
+	(
+		[GRNId]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_PurchaseOrder] (
+	[PurOrderId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[PurOrderNo] [bigint] NOT NULL ,
+	[RequisitionId] [bigint] NOT NULL ,
+	[RequiredDate] [smalldatetime] NOT NULL ,
+	[PaymentTerms] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[Others] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[GrandTotal] [float] NOT NULL ,
+	[PurOrderDate] [datetime] NULL ,
+	[PurOrderNum] [bigint] NULL 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_PurchaseRequestMaster] (
+	[RequisitionId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[RequisitionDate] [smalldatetime] NOT NULL ,
+	[EmployeeId] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[ApproverId] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL ,
+	[Status] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestMaster_Status] DEFAULT (0),
+	[GRN] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL ,
+	[isGRNApproved] [bit] NULL ,
+	[RequisitionNum] [int] NULL ,
+	CONSTRAINT [PK_tbl_PSystem_PurchaseRequest] PRIMARY KEY  CLUSTERED 
+	(
+		[RequisitionId]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+
+
+CREATE PROCEDURE [dbo].[sp_itbl_PSystem_GRN] 
+(@GRNNo as bigint,@PurOrderNo as bigint,@RequisitionId as bigint,@PartyChallanNo as varchar(50),@PartyChallanDate as smalldatetime,@SecurityEntryNo as varchar(50),@DeliveryDate as smalldatetime,@LLRRNo as varchar(50),@VehicleNo as varchar(50),@SupplierName as varchar(50),@ItemDescription as varchar(100),@QtyReceived as int,@QtyAccepted as int,@QtyRejected as int,@Remarks as varchar(500),@GRNNum as bigint) 
+as 
+INSERT INTO tbl_PSystem_GRN(GRNNo,PurOrderNo,RequisitionId,PartyChallanNo,PartyChallanDate,SecurityEntryNo,DeliveryDate,LLRRNo,VehicleNo,SupplierName,ItemDescription,QtyReceived,QtyAccepted,QtyRejected,Remarks,GRNNum)  
+VALUES (@GRNNo,@PurOrderNo,@RequisitionId,@PartyChallanNo,@PartyChallanDate,@SecurityEntryNo,@DeliveryDate,@LLRRNo,@VehicleNo,@SupplierName,@ItemDescription,@QtyReceived,@QtyAccepted,@QtyRejected,@Remarks,@GRNNum)
+GO
+
+
+
+CREATE PROCEDURE [dbo].[sp_itbl_PSystem_PurchaseOrder] 
+(@PurOrderNo as bigint,@RequisitionId as bigint,@RequiredDate as smalldatetime,@PaymentTerms as varchar(500),@Others as varchar(500),@GrandTotal as float,@PurOrderDate as datetime,@PurOrderNum as bigint) 
+as INSERT INTO tbl_PSystem_PurchaseOrder(PurOrderNo,RequisitionId,RequiredDate,PaymentTerms,Others,GrandTotal,PurOrderDate,PurOrderNum)  
+VALUES (@PurOrderNo,@RequisitionId,@RequiredDate,@PaymentTerms,@Others,@GrandTotal,@PurOrderDate,@PurOrderNum)
+GO
+
+
+CREATE procedure sp_PSystem_AddPurchaseRequest(@EmployeeId varchar(10),@ApproverId varchar(10))
+as
+DECLARE @ReqNum as INT
+select @ReqNum=(Counter+1) from tbl_PSystem_Control where DateDiff(DD,getDate(),EndDate)>=0 and ForType='PR'
+
+insert into tbl_PSystem_PurchaseRequestMaster(RequisitionDate,EmployeeId,ApproverId,Status,RequisitionNum) 
+values (convert(smalldatetime,convert(varchar, GETDATE(), 101),101),@EmployeeId,@ApproverId,0,@ReqNum)
+
+Update tbl_PSystem_Control SET Counter=(Counter+1)  where DateDiff(DD,getDate(),EndDate)>=0 and ForType='PR'
+GO
+
+
+
+
+

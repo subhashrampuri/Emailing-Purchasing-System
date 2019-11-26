@@ -1,0 +1,24 @@
+Function GetFinancialYearOnToday()
+	varMonth=datepart("m",date())
+	varYear=datepart("yyyy",date())
+
+	if varMonth<=3 then
+		returnValue=right(varYear-1,2)+"-"+right(varYear,2)
+	else
+		returnValue=right(varYear,2)+"-"+right(varYear+1,2)
+	end if
+
+	GetFinancialYearOnToday=returnValue
+End Function
+
+Function GetPurchaseRequisitionNo(RequisitionId)
+	GetPurchaseRequisitionNo="VSPL/PR/" & GetFinancialYearOnToday() & "/" & RequisitionId
+End Function
+
+Function GetPurchaseOrderNo(RequisitionId)
+	GetPurchaseOrderNo="VSPL/PO/" & GetFinancialYearOnToday() & "/" & RequisitionId
+End Function
+
+Function GetGRNNo(RequisitionId)
+	GetGRNNo="VSPL/GRN/" & GetFinancialYearOnToday() & "/" & RequisitionId
+End Function

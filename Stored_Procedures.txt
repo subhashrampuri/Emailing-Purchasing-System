@@ -1,0 +1,311 @@
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+CREATE PROCEDURE sp_PSystem_SetApproverPriorityOneStepHigher(@EmployeeId1 varchar(10))
+as
+begin
+	declare @Priority1 int
+	declare @Priority2 int
+	declare @HighestPriority int
+	declare @EmployeeId2 varchar(10)
+	
+	select @HighestPriority=min(Priority) from tbl_PSystem_Approver
+	select @Priority1=Priority from tbl_PSystem_Approver where EmployeeId=@EmployeeId1
+	set @HighestPriority=isnull(@HighestPriority,0)
+	set @Priority1=isnull(@Priority1,0)
+	--PRINT 'Highest : ' + cast(@HighestPriority as varchar)
+	--PRINT 'EmployeeId1: ' + @EmployeeId1
+	--PRINT 'Priority1: ' + cast(@Priority1 as varchar(10))
+	if @Priority1<>@HighestPriority
+	begin
+		select top 1 @Priority2=Priority,@EmployeeId2=EmployeeId from tbl_PSystem_Approver where Priority<@Priority1 order by Priority desc
+		--PRINT 'EmployeeId2: ' + @EmployeeId2
+		--PRINT 'Priority2: ' + cast(@Priority2 as varchar)
+		update tbl_PSystem_Approver set Priority=@Priority2 where EmployeeId=@EmployeeId1
+		update tbl_PSystem_Approver set Priority=@Priority1 where EmployeeId=@EmployeeId2
+	end
+end
+GO
+
+
+
+CREATE PROCEDURE sp_PSystem_SetApproverPriorityOneStepLower(@EmployeeId1 varchar(10))
+as
+begin
+	declare @Priority1 int
+	declare @Priority2 int
+	declare @LowestPriority int
+	declare @EmployeeId2 varchar(10)
+	
+	select @LowestPriority=max(Priority) from tbl_PSystem_Approver
+	select @Priority1=Priority from tbl_PSystem_Approver where EmployeeId=@EmployeeId1
+	--set @LowestPriority=isnull(@LowestPriority,0)
+	--set @Priority1=isnull(@Priority1,0)
+
+	--PRINT 'Highest : ' + cast(@LowestPriority as varchar)
+	--PRINT 'EmployeeId1: ' + @EmployeeId1
+	--PRINT 'Priority1: ' + cast(@Priority1 as varchar(10))
+
+	
+	if @Priority1<>@LowestPriority
+	begin
+		select top 1 @Priority2=Priority,@EmployeeId2=EmployeeId from tbl_PSystem_Approver where Priority>@Priority1 order by Priority 
+		--PRINT 'EmployeeId2: ' + @EmployeeId2
+		--PRINT 'Priority2: ' + cast(@Priority2 as varchar)
+		update tbl_PSystem_Approver set Priority=@Priority2 where EmployeeId=@EmployeeId1
+		update tbl_PSystem_Approver set Priority=@Priority1 where EmployeeId=@EmployeeId2
+	end
+end
+
+GO
+
+
+
+CREATE procedure sp_PSystem_AddApprover(@EmployeeId varchar(10))
+as
+	declare @cnt as bigint
+	select @cnt=count(*) from tbl_PSystem_Approver where EmployeeId=@EmployeeId
+	if @cnt=0
+		insert into tbl_PSystem_Approver values(@EmployeeId,dbo.fn_PSystem_GetNextApproverPriority())
+GO
+
+
+
+CREATE PROCEDURE sp_PSystem_SetPurchaserPriorityOneStepHigher(@EmployeeId1 varchar(10))
+as
+begin
+	declare @Priority1 int
+	declare @Priority2 int
+	declare @HighestPriority int
+	declare @EmployeeId2 varchar(10)
+	
+	select @HighestPriority=min(Priority) from tbl_PSystem_PurchaseTeam
+	select @Priority1=Priority from tbl_PSystem_PurchaseTeam where EmployeeId=@EmployeeId1
+	set @HighestPriority=isnull(@HighestPriority,0)
+	set @Priority1=isnull(@Priority1,0)
+	--PRINT 'Highest : ' + cast(@HighestPriority as varchar)
+	--PRINT 'EmployeeId1: ' + @EmployeeId1
+	--PRINT 'Priority1: ' + cast(@Priority1 as varchar(10))
+	if @Priority1<>@HighestPriority
+	begin
+		select top 1 @Priority2=Priority,@EmployeeId2=EmployeeId from tbl_PSystem_PurchaseTeam where Priority<@Priority1 order by Priority desc
+		--PRINT 'EmployeeId2: ' + @EmployeeId2
+		--PRINT 'Priority2: ' + cast(@Priority2 as varchar)
+		update tbl_PSystem_PurchaseTeam set Priority=@Priority2 where EmployeeId=@EmployeeId1
+		update tbl_PSystem_PurchaseTeam set Priority=@Priority1 where EmployeeId=@EmployeeId2
+	end
+end
+
+GO
+
+
+
+CREATE PROCEDURE sp_PSystem_SetPurchaserPriorityOneStepLower(@EmployeeId1 varchar(10))
+as
+begin
+	declare @Priority1 int
+	declare @Priority2 int
+	declare @LowestPriority int
+	declare @EmployeeId2 varchar(10)
+	
+	select @LowestPriority=max(Priority) from tbl_PSystem_PurchaseTeam
+	select @Priority1=Priority from tbl_PSystem_PurchaseTeam where EmployeeId=@EmployeeId1
+
+	--PRINT 'Highest : ' + cast(@LowestPriority as varchar)
+	--PRINT 'EmployeeId1: ' + @EmployeeId1
+	--PRINT 'Priority1: ' + cast(@Priority1 as varchar(10))
+	
+	if @Priority1<>@LowestPriority
+	begin
+		select top 1 @Priority2=Priority,@EmployeeId2=EmployeeId from tbl_PSystem_PurchaseTeam where Priority>@Priority1 order by Priority
+		--PRINT 'EmployeeId2: ' + @EmployeeId2
+		--PRINT 'Priority2: ' + cast(@Priority2 as varchar)
+		update tbl_PSystem_PurchaseTeam set Priority=@Priority2 where EmployeeId=@EmployeeId1
+		update tbl_PSystem_PurchaseTeam set Priority=@Priority1 where EmployeeId=@EmployeeId2
+	end
+end
+
+GO
+
+
+
+CREATE procedure sp_PSystem_AddPurchaser(@EmployeeId varchar(10))
+as
+	declare @cnt as bigint
+	select @cnt=count(*) from tbl_PSystem_PurchaseTeam where EmployeeId=@EmployeeId
+	if @cnt=0
+		insert into tbl_PSystem_PurchaseTeam values(@EmployeeId,dbo.fn_PSystem_GetNextPurchaserPriority())
+GO
+
+
+
+CREATE procedure sp_PSystem_EditSupplier
+(
+	@SupplierName varchar(50)
+)
+as
+
+	select * from tbl_PSystem_Supplier where SupplierName=@SupplierName
+
+GO
+
+
+
+CREATE procedure sp_PSystem_AddSupplier
+(
+	@SupplierName varchar(50),
+	@SupplierAddress varchar(255),
+	@ContactPerson varchar(50),
+	@ContactPersonJobTitle varchar(50),
+	@TelephoneNo varchar(50),
+	@MobileNo varchar(50),
+	@EmailId varchar(50),
+	@CSTNo varchar(50),
+	@TINNo varchar(50),
+	@URL varchar(50),
+	@TANNo varchar(50),
+	@ServiceTaxNo varchar(50)
+)
+as
+
+declare @isSupplierExists int
+
+select @isSupplierExists=dbo.fn_PSystem_isSupplierExists(@SupplierName)
+
+if @isSupplierExists=0
+	insert into tbl_PSystem_Supplier (SupplierName,SupplierAddress,ContactPerson,ContactPersonJobTitle,TelephoneNo,MobileNo,EmailId,CSTNo,TINNo,URL,TANNo,ServiceTaxNo) values(@SupplierName,@SupplierAddress,@ContactPerson,@ContactPersonJobTitle,@TelephoneNo,@MobileNo,@EmailId,@CSTNo,@TINNo,@URL,@TANNo,@ServiceTaxNo)
+
+GO
+
+
+
+CREATE procedure sp_PSystem_SaveEditSupplier
+(
+	@SupplierName varchar(50),
+	@SupplierAddress varchar(255),
+	@ContactPerson varchar(50),
+	@ContactPersonJobTitle varchar(50),
+	@TelephoneNo varchar(50),
+	@MobileNo varchar(50),
+	@EmailId varchar(50),
+	@CSTNo varchar(50),
+	@TINNo varchar(50),
+	@URL varchar(50),
+	@TANNo varchar(50),
+	@ServiceTaxNo varchar(50),
+	@isActive bit
+)
+as
+
+ update tbl_PSystem_Supplier set SupplierAddress=@SupplierAddress,ContactPerson=@ContactPerson,ContactPersonJobTitle=@ContactPersonJobTitle,TelephoneNo=@TelephoneNo,MobileNo=@MobileNo,EmailId=@EmailId,CSTNo=@CSTNo,TINNo=@TINNo,URL=@URL,TANNo=@TANNo,ServiceTaxNo=@ServiceTaxNo,isActive=@isActive where SupplierName=@SupplierName
+
+GO
+
+
+
+create procedure sp_PSystem_GetLoggedEmployeeNameAndEmail(@EmployeeId as
+varchar(10))
+as
+select
+EmployeeName=dbo.fn_TSystem_EmployeeName(@EmployeeId),EmployeeEmail=dbo.fn_TSystem_EmployeeEmail(@EmployeeId)
+
+GO
+
+
+
+CREATE procedure sp_PSystem_AddPurchaseRequest(@EmployeeId varchar(10),@ApproverId varchar(10))
+as
+insert into tbl_PSystem_PurchaseRequestMaster(RequisitionDate,EmployeeId,ApproverId,Status) values (convert(smalldatetime,convert(varchar, GETDATE(), 101),101),@EmployeeId,@ApproverId,0)
+
+GO
+
+
+
+CREATE procedure sp_PSystem_AddPurchaseRequestItem
+(
+	@RequisitionId bigint,
+	@ItemDescription varchar(50),
+	@ProjectId bigint,
+	@Purpose varchar(255),
+	@QuantityRequested int,
+	@RequiredDate smalldatetime,
+	@ApproxUnitCost money,
+	@RupeeOrDollar bit,
+	@PurchaseOrService bit,
+	@PossibleSource varchar(255),
+	@SpecialInstruction varchar(255)
+)
+as
+
+insert into tbl_PSystem_PurchaseRequestTransaction(RequisitionId,ItemDescription,ProjectId,Purpose,QuantityRequested,RequiredDate,ApproxUnitCost,RupeeOrDollar,PurchaseOrService,PossibleSource,SpecialInstruction)
+values
+(@RequisitionId,@ItemDescription,@ProjectId,@Purpose,@QuantityRequested,@RequiredDate,@ApproxUnitCost,@RupeeOrDollar,@PurchaseOrService,@PossibleSource,@SpecialInstruction)
+
+GO
+
+
+CREATE procedure sp_PSystem_GetItemsByPurchaseRequisitionId(@RequisitionId as bigint)
+as
+select ItemDescription,dbo.fn_TimeSheet_GetProjectName(ProjectId) as Project,Purpose,QuantityRequested,dbo.fn_PSystem_isPurchaseOrService(PurchaseOrService) as ServiceType,dbo.fn_TSystem_GetVelankaniFormatDate(RequiredDate) as RequiredDate,ApproxUnitCost,dbo.fn_PSystem_isRupeeOrDollar(RupeeOrDollar) as Currency,PossibleSource,SpecialInstruction from tbl_PSystem_PurchaseRequestTransaction where RequisitionId=@RequisitionId
+
+GO
+
+
+
+create procedure sp_PSystem_GetActiveApprover
+as
+	declare @maxPriority as int
+	select @maxPriority=min(Priority) from tbl_PSystem_Approver
+	select EmployeeId,EmployeeName=dbo.fn_TSystem_EmployeeName(EmployeeId),EmployeeEmail=dbo.fn_TSystem_EmployeeEmail(EmployeeId) from tbl_PSystem_Approver where Priority=@maxPriority
+
+GO
+
+
+create procedure sp_PSystem_GetActivePurchaseTeam
+as
+	declare @maxPriority as int
+	select @maxPriority=min(Priority) from tbl_PSystem_PurchaseTeam
+	select EmployeeId,EmployeeName=dbo.fn_TSystem_EmployeeName(EmployeeId),EmployeeEmail=dbo.fn_TSystem_EmployeeEmail(EmployeeId) from tbl_PSystem_PurchaseTeam where Priority=@maxPriority
+GO
+
+
+CREATE PROCEDURE [dbo].[sp_itbl_PSystem_TransactionDetails] 
+(@RequisitionId as bigint,@ItemDescription as varchar(50),@ProjectId as int,@QuantityApproved as int,@Status as int) 
+as 
+INSERT INTO tbl_PSystem_TransactionDetails(RequisitionId,ItemDescription,ProjectId,QuantityApproved,Status)  
+VALUES (@RequisitionId,@ItemDescription,@ProjectId,@QuantityApproved,@Status) 
+
+GO
+
+
+
+CREATE PROCEDURE [dbo].[sp_itbl_PSystem_Quotations] (@RequisitionId as bigint,@ItemDescription as varchar(50),@ItemCode as varchar(50),@ProjectId as bigint,@SupplierName as varchar(50),@UnitPrice as money,@Currency as bit,@isTaxIncludedOrExcluded as bit,@TaxPercent as decimal,@Quantity as bigint,@Warranty as varchar(50),@DeliveryTime as varchar(50),@PaymentTerms as varchar(50),@Remarks as varchar(255)) 
+as 
+INSERT INTO tbl_PSystem_Quotations(RequisitionId,ItemDescription,ItemCode,ProjectId,SupplierName,UnitPrice,Currency,isTaxIncludedOrExcluded,TaxPercent,Quantity,Warranty,DeliveryTime,PaymentTerms,Remarks)  
+VALUES (@RequisitionId,@ItemDescription,@ItemCode,@ProjectId,@SupplierName,@UnitPrice,@Currency,@isTaxIncludedOrExcluded,@TaxPercent,@Quantity,@Warranty,@DeliveryTime,@PaymentTerms,@Remarks)
+
+GO
+
+
+
+CREATE PROCEDURE [dbo].[sp_itbl_PSystem_PurchaseOrder] 
+(@PurOrderNo as bigint,@RequisitionId as bigint,@RequiredDate as smalldatetime,@PaymentTerms as varchar(500),@Others as varchar(500),@GrandTotal as float) 
+as INSERT INTO tbl_PSystem_PurchaseOrder(PurOrderNo,RequisitionId,RequiredDate,PaymentTerms,Others,GrandTotal)  
+VALUES (@PurOrderNo,@RequisitionId,@RequiredDate,@PaymentTerms,@Others,@GrandTotal) 
+
+GO
+
+
+
+CREATE PROCEDURE [dbo].[sp_itbl_PSystem_GRN] 
+(@GRNNo as bigint,@PurOrderNo as bigint,@RequisitionId as bigint,@PartyChallanNo as varchar(50),@PartyChallanDate as smalldatetime,@SecurityEntryNo as varchar(50),@DeliveryDate as smalldatetime,@LLRRNo as varchar(50),@VehicleNo as varchar(50),@SupplierName as varchar(50),@ItemDescription as varchar(100),@QtyReceived as int,@QtyAccepted as int,@QtyRejected as int,@Remarks as varchar(500)) 
+as 
+INSERT INTO tbl_PSystem_GRN(GRNNo,PurOrderNo,RequisitionId,PartyChallanNo,PartyChallanDate,SecurityEntryNo,DeliveryDate,LLRRNo,VehicleNo,SupplierName,ItemDescription,QtyReceived,QtyAccepted,QtyRejected,Remarks)  
+VALUES (@GRNNo,@PurOrderNo,@RequisitionId,@PartyChallanNo,@PartyChallanDate,@SecurityEntryNo,@DeliveryDate,@LLRRNo,@VehicleNo,@SupplierName,@ItemDescription,@QtyReceived,@QtyAccepted,@QtyRejected,@Remarks) 
+
+GO
+
+
+

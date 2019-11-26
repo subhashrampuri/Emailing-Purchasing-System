@@ -1,0 +1,178 @@
+CREATE TABLE [tbl_PSystem_Approver] (
+	[EmployeeId] [varchar] (10)  NOT NULL ,
+	[Priority] [int] NOT NULL 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_FinanceManager] (
+	[FinanceManager] [varchar] (50)  NULL 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_GRN] (
+	[GRNId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[GRNNo] [bigint] NOT NULL ,
+	[PurOrderNo] [bigint] NOT NULL ,
+	[RequisitionId] [bigint] NOT NULL ,
+	[PartyChallanNo] [varchar] (50)  NOT NULL ,
+	[PartyChallanDate] [smalldatetime] NOT NULL ,
+	[SecurityEntryNo] [varchar] (50)  NULL ,
+	[DeliveryDate] [smalldatetime] NOT NULL ,
+	[LLRRNo] [varchar] (50)  NOT NULL ,
+	[VehicleNo] [varchar] (50)  NULL ,
+	[SupplierName] [varchar] (50)  NOT NULL ,
+	[ItemDescription] [varchar] (100)  NOT NULL ,
+	[QtyReceived] [int] NULL ,
+	[QtyAccepted] [int] NULL ,
+	[QtyRejected] [int] NULL ,
+	[Remarks] [varchar] (500)  NULL ,
+	[RemarksOnAccOrRej] [varchar] (500)  NULL ,
+	[isAccepted] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_GRN_isAccepted] DEFAULT (0),
+	[isGRNClosed] [bit] NOT NULL CONSTRAINT [DF_tbl_PSystem_GRN_isClosed] DEFAULT (0),
+	CONSTRAINT [PK_tbl_PSystem_GRN] PRIMARY KEY  CLUSTERED 
+	(
+		[GRNId]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_PurchaseOrder] (
+	[PurOrderId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[PurOrderNo] [bigint] NOT NULL ,
+	[RequisitionId] [bigint] NOT NULL ,
+	[RequiredDate] [smalldatetime] NOT NULL ,
+	[PaymentTerms] [varchar] (500)  NOT NULL ,
+	[Others] [varchar] (500)  NULL ,
+	[GrandTotal] [float] NOT NULL 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_PurchaseRequestMaster] (
+	[RequisitionId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[RequisitionDate] [smalldatetime] NOT NULL ,
+	[EmployeeId] [varchar] (10)  NOT NULL ,
+	[ApproverId] [varchar] (10)  NOT NULL ,
+	[Status] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestMaster_Status] DEFAULT (0),
+	[GRN] [varchar] (50)  NULL ,
+	[isGRNApproved] [bit] NULL ,
+	CONSTRAINT [PK_tbl_PSystem_PurchaseRequest] PRIMARY KEY  CLUSTERED 
+	(
+		[RequisitionId]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_PurchaseRequestTransaction] (
+	[RequisitionId] [bigint] NOT NULL ,
+	[ItemDescription] [nvarchar] (400)  NOT NULL ,
+	[Purpose] [nvarchar] (2040)  NOT NULL ,
+	[QuantityRequested] [int] NOT NULL ,
+	[QuantityApproved] [int] NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestTransaction_QuantityApproved] DEFAULT (0),
+	[QuantityOrdered] [int] NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestTransaction_QuantityOrdered] DEFAULT (0),
+	[QuantityReceived] [int] NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestTransaction_QuantityReceived] DEFAULT (0),
+	[PossibleSource] [nvarchar] (2040)  NULL ,
+	[SpecialInstruction] [nvarchar] (2040)  NULL ,
+	[RequiredDate] [smalldatetime] NOT NULL ,
+	[ApproxUnitCost] [money] NULL ,
+	[RupeeOrDollar] [bit] NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestTransaction_Currency] DEFAULT (0),
+	[ProjectId] [bigint] NOT NULL ,
+	[PurchaseOrService] [bit] NOT NULL ,
+	[IsVelankaniAsset] [bit] NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestTransaction_isApproved] DEFAULT (0),
+	[Status] [int] NULL CONSTRAINT [DF_tbl_PSystem_PurchaseRequestTransaction_Status] DEFAULT (0),
+	CONSTRAINT [PK_tbl_PSystem_PurchaseRequestTransaction] PRIMARY KEY  CLUSTERED 
+	(
+		[RequisitionId],
+		[ItemDescription],
+		[ProjectId]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_PurchaseTeam] (
+	[EmployeeId] [varchar] (10)  NOT NULL ,
+	[Priority] [int] NOT NULL ,
+	CONSTRAINT [PK_tbl_PSystem_PurchaseTeam] PRIMARY KEY  CLUSTERED 
+	(
+		[EmployeeId]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_Quotations] (
+	[QuotationId] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[RequisitionId] [bigint] NOT NULL ,
+	[ItemDescription] [varchar] (50)  NOT NULL ,
+	[ItemCode] [varchar] (50)  NOT NULL ,
+	[ProjectId] [bigint] NOT NULL ,
+	[SupplierName] [varchar] (50)  NOT NULL ,
+	[UnitPrice] [money] NOT NULL ,
+	[Currency] [bit] NOT NULL ,
+	[isTaxIncludedOrExcluded] [bit] NOT NULL ,
+	[TaxPercent] [decimal](18, 2) NULL ,
+	[Quantity] [bigint] NOT NULL ,
+	[Warranty] [varchar] (50)  NOT NULL ,
+	[DeliveryTime] [varchar] (50)  NOT NULL ,
+	[PaymentTerms] [varchar] (50)  NOT NULL ,
+	[Remarks] [varchar] (255)  NULL ,
+	[isApproved] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_Quotations_isApproved] DEFAULT (0),
+	[isClosed] [bit] NOT NULL CONSTRAINT [DF_tbl_PSystem_Quotations_isClosed] DEFAULT (0),
+	[isGRNEntered] [char] (10)  NOT NULL CONSTRAINT [DF_tbl_PSystem_Quotations_isGRNEntered] DEFAULT (0),
+	[PurOrderNo] [bigint] NULL CONSTRAINT [DF_tbl_PSystem_Quotations_PurOrderNo] DEFAULT (0),
+	[Quantity_Received] [bigint] NULL CONSTRAINT [DF_tbl_PSystem_Quotations_Quantity_Received] DEFAULT (0),
+	CONSTRAINT [PK_tbl_PSystem_Quotations] PRIMARY KEY  CLUSTERED 
+	(
+		[QuotationId]
+	)  ON [PRIMARY] ,
+	CONSTRAINT [IX_tbl_PSystem_Quotations] UNIQUE  NONCLUSTERED 
+	(
+		[ItemCode]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_Supplier] (
+	[SupplierName] [varchar] (50)  NOT NULL ,
+	[SupplierAddress] [varchar] (255)  NOT NULL ,
+	[ContactPerson] [varchar] (50)  NOT NULL ,
+	[ContactPersonJobTitle] [varchar] (50)  NULL ,
+	[TelephoneNo] [varchar] (50)  NOT NULL ,
+	[MobileNo] [varchar] (50)  NOT NULL ,
+	[EmailId] [varchar] (50)  NOT NULL ,
+	[CSTNo] [varchar] (50)  NULL ,
+	[TINNo] [varchar] (50)  NOT NULL ,
+	[URL] [varchar] (50)  NOT NULL ,
+	[TANNo] [varchar] (50)  NOT NULL ,
+	[ServiceTaxNo] [varchar] (50)  NULL ,
+	[isActive] [bit] NOT NULL CONSTRAINT [DF_tbl_PSystem_Supplier_isActive] DEFAULT (1),
+	CONSTRAINT [PK_tbl_PSystem_Supplier] PRIMARY KEY  CLUSTERED 
+	(
+		[SupplierName]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
+CREATE TABLE [tbl_PSystem_TransactionDetails] (
+	[TransactionID] [bigint] IDENTITY (1, 1) NOT NULL ,
+	[RequisitionId] [bigint] NOT NULL ,
+	[ItemDescription] [varchar] (50)  NOT NULL ,
+	[ProjectId] [int] NOT NULL ,
+	[QuantityApproved] [int] NOT NULL ,
+	[isQuotationEntered] [int] NOT NULL CONSTRAINT [DF_tbl_PSystem_TransactionDetails_isQuotationEntered] DEFAULT (0),
+	[Status] [int] NOT NULL ,
+	CONSTRAINT [PK_tbl_PSystem_TransactionDetails] PRIMARY KEY  CLUSTERED 
+	(
+		[TransactionID]
+	)  ON [PRIMARY] 
+) ON [PRIMARY]
+GO
+
+
