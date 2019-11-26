@@ -1,5 +1,5 @@
 
-Hi Vinay,
+Hi,
 After updating Tables and stored procedures,
 Run below Sql Update statements 
 
